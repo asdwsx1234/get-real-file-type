@@ -13,9 +13,10 @@ import { TypeFile } from 'get-real-file-type';
 const fileInput = document.createElement('input');
 fileInput.setAttribute('type', file);
 
+// with async/await:
 fileInput.onchange = async function(e) {
   const file = e.target.files[0];
-  const typeFile = await TypeFile.build(file);   // return example: {ext: 'mp4', mime: 'video/mp4', realExt: 'mp4', realMime: 'video/mp4'}
+  const typeFile = await TypeFile.build(file);
   
   if(typeFile.isType('video/mp4')) {
     // TODO
@@ -26,7 +27,7 @@ fileInput.onchange = async function(e) {
   }
 }
 
-// or
+// or with then
 
 fileInput.onchange = function(e) {
   const file = e.target.files[0];
