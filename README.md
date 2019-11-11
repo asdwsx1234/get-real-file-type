@@ -37,7 +37,7 @@ fileInput.onchange = function(e) {
 
 `getRealType`默认为`true`，表示获取真实的文件信息，不传入则`realExt`和`realMime`都为`null`
 
-该函数会返回一个Promise, 最终resolve的结果是`TypeFile`实例:
+该函数会返回一个`TypeFile`实例:
 
 #### init(callback)
 `callback`只支持传入一个可执行函数(this指向当前实例)，在`callback`调用的时候，该实例已经初始化完成。
