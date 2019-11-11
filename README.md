@@ -53,9 +53,11 @@ fileInput.onchange = function(e) {
 ### TypeFile.build(file, getRealType?)
 
 `file`参数需要是一个浏览器的`File实例`，或者是一个`object`包含`File实例`
+
 `getRealType`默认为`true`，表示获取真实的文件信息，不传入则`realExt`和`realMime`都为`null`
 
 因为是通过二进制获取真实的文件mime，所以会异步的调用构造函数。
+
 该函数会返回一个Promise, 最终resolve的结果是`TypeFile`实例:
 
 - `ext` - 根据文件名解析的后缀
@@ -66,6 +68,7 @@ fileInput.onchange = function(e) {
 
 #### isType(targetMimeType, compareType?)
 `targetMimeType`可以传入一个字符串，或者一个字符串数组，用于和实例中的文件属性进行比较。
+
 `compareType`默认为`TypeFile.COMPARE_TYPE.REAL_FIRST`,也就是`0`，优先比较真实的文件属性。
 
 返回值为`Boolean`
