@@ -1,0 +1,24 @@
+{
+  "name": "get-real-file-type",
+  "version": "1.0.8",
+  "description": "get real file type.",
+  "main": "./lib/index.js",
+  "scripts": {
+    "compile": "babel src -d lib",
+    "prepublish": "npm run compile"
+  },
+  "repository": "https://github.com/asdwsx1234/get-real-file-type",
+  "author": "814930498@qq.com",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/runtime": "^7.7.2",
+    "file-type": "^12.4.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.40",
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/preset-env": "^7.7.1"
+  }
+}
