@@ -14,6 +14,7 @@ const fileInput = document.createElement('input');
 fileInput.setAttribute('type', file);
 
 // with async/await:
+
 fileInput.onchange = async function(e) {
   const file = e.target.files[0];
   const typeFile = await TypeFile.build(file);
