@@ -13,54 +13,45 @@ import { TypeFile } from 'get-real-file-type';
 const fileInput = document.createElement('input');
 fileInput.setAttribute('type', file);
 
-fileInput.onchange = async function(e) {
-  const file = e.target.files[0];
-  const typeFile = await TypeFile.build(file);   // return example: {ext: 'mp4', mime: 'video/mp4', realExt: 'mp4', realMime: 'video/mp4'}
-  
-  if(typeFile.isType('video/mp4')) {
-    // TODO
-  }
-
-  if(typeFile.isType(['video/mp4', 'video/flv', 'video/vnd.avi'])) {
-    // TODO
-  }
-}
-
-// or
-
 fileInput.onchange = function(e) {
   const file = e.target.files[0];
-
-  TypeFile.build(file).then(typeFile => {
-
-    if(typeFile.isType('video/mp4')) {
+  const typeFile = new TypeFile(file);
+  typeFile.init(function() {
+    if(this.isType('video/mp4')) {
       // TODO
     }
 
-    if(typeFile.isType(['video/mp4', 'video/flv', 'video/vnd.avi'])) {
+    if(this.isType(['video/mp4', 'video/flv', 'video/vnd.avi'])) {
       // TODO
     }
   })
 }
 
-
 ```
 
 ## API
 
-### TypeFile.build(file, getRealType?)
+### TypeFile(file, getRealType?)
 
 `file`参数需要是一个浏览器的`File实例`，或者是一个`object`包含`File实例`
 `getRealType`默认为`true`，表示获取真实的文件信息，不传入则`realExt`和`realMime`都为`null`
 
 因为是通过二进制获取真实的文件mime，所以会异步的调用构造函数。
-该函数会返回一个Promise, 最终resolve的结果是`TypeFile`实例:
+该函数会返回一个`TypeFile`实例:
 
+- `file` - 传入的文件参数
+- `getRealType` - 是否获取真实文件信息的Boolean，默认为true
+- `init` - 一个实例的方法，在这个方法的回调函数中才可以执行`isType`方法
+- `isType` - 一个实例的方法，用于将以上属性和期望的属性进行比较。
+
+#### init(callback)
+`callback`只支持传入一个可执行函数(this指向当前实例)，在`callback`调用的时候，该实例已经初始化完成。
+
+初始化完成后会给实例初始化以下属性：
 - `ext` - 根据文件名解析的后缀
 - `mime` - 浏览器通过文件名后缀解析的mimeType
 - `realExt` - 真实的文件后缀
 - `realMime` - 真实的文件的mimeType
-- `isType` - 一个实例的方法，用于将以上属性和期望的属性进行比较。
 
 #### isType(targetMimeType, compareType?)
 `targetMimeType`可以传入一个字符串，或者一个字符串数组，用于和实例中的文件属性进行比较。

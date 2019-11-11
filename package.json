@@ -1,6 +1,6 @@
 {
   "name": "get-real-file-type",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "get real file type.",
   "main": "./lib/index.js",
   "scripts": {

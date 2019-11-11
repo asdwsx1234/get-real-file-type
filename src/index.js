@@ -36,25 +36,19 @@ class TypeFile {
     }
   }
 
-  static build(file, getRealType = true) {
-    return getType(file, getRealType).then(typeObj => {
-      return new TypeFile(typeObj);
-    });
+  constructor(file, getRealType = true) {
+    this.file = file;
+    this.getRealType = getRealType;
   }
 
-  constructor(async_typeObj) {
-    if (typeof async_typeObj === 'undefined') {
-      throw new Error('Cannot be called directly');
-    } else if (typeof async_typeObj !== 'object') {
-      throw new Error(
-        `need a object like { ext: 'mp4', mime: 'video/mp4', realExt: 'mp4', realMime: 'video/mp4' }`,
-      );
-    }
-
-    this.ext = async_typeObj.ext;
-    this.mime = async_typeObj.mime;
-    this.realExt = async_typeObj.realExt;
-    this.realMime = async_typeObj.realMime;
+  init(callback) {
+    getType(this.file, this.getRealType).then(async_typeObj => {
+      this.ext = async_typeObj.ext;
+      this.mime = async_typeObj.mime;
+      this.realExt = async_typeObj.realExt;
+      this.realMime = async_typeObj.realMime;
+      callback.bind(this)();
+    });
   }
   /**
    * @param {*} targetMimeType
