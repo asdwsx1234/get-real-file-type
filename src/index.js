@@ -1,6 +1,6 @@
 import fileType from 'file-type';
 
-import { isString, isStringArray, getFileExt } from './util.js';
+import { isObject, isString, isStringArray, isFileInstance, getFileExt } from './util.js';
 import browserMimeMapping from './browserMimeMapping';
 
 const extensions = fileType.extensions;
@@ -90,7 +90,7 @@ class TypeFile {
 const getType = (fileInstance, getRealType) => {
   return new Promise((resolve, reject) => {
     let file = fileInstance;
-    if (typeof file !== 'object' && !file instanceof File) {
+    if (!isObject(file) && !isFileInstance(file)) {
       reject(new Error('first param need a File instance or a Object include File instance.'));
     } else {
       for (let key in file) {
