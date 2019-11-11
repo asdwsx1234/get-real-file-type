@@ -57,26 +57,6 @@ class TypeFile {
     this.realMime = async_typeObj.realMime;
   }
   /**
-   * 如果传入mimeType字符串
-   * 1、先比较真实的mime
-   *    匹配  -> true
-   *    不匹配  -> false
-   *    真实的mime为null,去比较浏览器的mime
-   *      2、比较浏览器的mime
-   *         匹配 -> true
-   *         不匹配 -> false
-   *         浏览器的mime为null -> false
-   *
-   * 如果传入mimeType数组
-   * 1、遍历数组比较真实的mime
-   *    存在匹配  -> true
-   *    不存在匹配  -> false
-   *    真实的mime为null,去比较浏览器的mime
-   *      2、遍历数组比较浏览器的mime
-   *         存在匹配 -> true
-   *         不存在匹配 -> false
-   *         浏览器的mime为null -> false
-   *
    * @param {*} targetMimeType
    * @param {*} compareRealType
    */
