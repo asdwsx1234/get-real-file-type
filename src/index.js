@@ -96,11 +96,26 @@ class TypeFile {
 const getType = input => {
   return new Promise((resolve, reject) => {
     if (!isUint8Array(input)) {
-      return fileToUint8Array(input).then(
+
+      let file = input;
+      if (isObject(file) && !isFileInstance(file)) {
+        for (let key in file) {
+          if (isFileInstance(file[key])) {
+            file = file[key];
+            break;
+          }
+        }
+      }
+  
+      if (!isFileInstance(file)) {
+        return reject('first param need a File instance or a Object include File instance.');
+      }
+
+      return fileToUint8Array(file).then(
         u8 => {
           return resolve({
-            ext: getFileExt(input),
-            mime: input.type ? input.type : null,
+            ext: getFileExt(file),
+            mime: file.type ? file.type : null,
             ...getRealTypeFromUint8Array(u8),
           });
         },
@@ -121,22 +136,8 @@ const getRealTypeFromUint8Array = u8 => {
   };
 };
 
-const fileToUint8Array = f => {
-  let file = f;
+const fileToUint8Array = file => {
   return new Promise((resolve, reject) => {
-    if (isObject(file) && !isFileInstance(file)) {
-      for (let key in file) {
-        if (isFileInstance(file[key])) {
-          file = file[key];
-          break;
-        }
-      }
-    }
-
-    if (!isFileInstance(file)) {
-      return reject('first param need a File instance or a Object include File instance.');
-    }
-
     if (!isInBrowser()) {
       return reject('FileReader is not support! not in browser');
     }
