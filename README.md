@@ -15,7 +15,7 @@ fileInput.setAttribute('type', file);
 
 fileInput.onchange = function(e) {
   const file = e.target.files[0];
-  const typeFile = new TypeFile(file);
+  const typeFile = new TypeFile(file); // 这里支持传入File实例/包含File实例的对象/Uint8Array
   typeFile.init(function() {
     if(this.isType('video/mp4')) {
       // TODO
@@ -33,7 +33,9 @@ fileInput.onchange = function(e) {
 
 ### TypeFile(file, getRealType?)
 
-`file`参数需要是一个浏览器的`File实例`，或者是一个`object`包含`File实例`
+`file`参数需要是一个浏览器的`File实例`，或者是一个`object`包含`File实例`，或者是一个`Uint8Array`
+
+`File`实例最终也会转化为`Uint8Array`
 
 `getRealType`默认为`true`，表示获取真实的文件信息，不传入则`realExt`和`realMime`都为`null`
 
@@ -43,10 +45,12 @@ fileInput.onchange = function(e) {
 `callback`只支持传入一个可执行函数(this指向当前实例)，在`callback`调用的时候，该实例已经初始化完成。
 
 初始化完成后会给实例初始化以下属性：
-- `ext` - 根据文件名解析的后缀
-- `mime` - 浏览器通过文件名后缀解析的mimeType
+- `ext` - 根据文件名解析的后缀(只传入Uint8Array为null)
+- `mime` - 浏览器通过文件名后缀解析的mimeType(只传入Uint8Array为null)
 - `realExt` - 真实的文件后缀
 - `realMime` - 真实的文件的mimeType
+
+识别不出的属性也为null
 
 #### isType(targetMimeType, compareType?)
 `targetMimeType`可以传入一个字符串，或者一个字符串数组，用于和实例中的文件属性进行比较。

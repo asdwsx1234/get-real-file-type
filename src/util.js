@@ -3,6 +3,10 @@ const genTag = '[object GeneratorFunction]';
 
 const objectToString = Object.prototype.toString;
 
+export function isInBrowser() {
+  return typeof window !== 'undefined';
+}
+
 export function isObject(arg) {
   var type = typeof arg;
   return arg != null && (type == 'object' || type == 'function');
@@ -22,8 +26,13 @@ export function isFunction(arg) {
 }
 
 export function isFileInstance(arg) {
-  if (!window) return false;
+  if (!isInBrowser() || !isObject(arg)) return false;
   return arg instanceof File;
+}
+
+export function isUint8Array(arg) {
+  if (!isObject(arg)) return false;
+  return arg instanceof Uint8Array;
 }
 
 export function getFileExt(file) {

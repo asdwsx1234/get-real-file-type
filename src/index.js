@@ -1,6 +1,14 @@
 import fileType from 'file-type';
 
-import { isObject, isString, isStringArray, isFileInstance, getFileExt } from './util.js';
+import {
+  isObject,
+  isString,
+  isStringArray,
+  isFileInstance,
+  getFileExt,
+  isUint8Array,
+  isInBrowser,
+} from './util.js';
 import browserMimeMapping from './browserMimeMapping';
 
 const extensions = fileType.extensions;
@@ -36,19 +44,22 @@ class TypeFile {
     }
   }
 
-  constructor(file, getRealType = true) {
-    this.file = file;
-    this.getRealType = getRealType;
+  constructor(input) {
+    this.input = input;
   }
 
   init(callback) {
-    getType(this.file, this.getRealType).then(async_typeObj => {
-      this.ext = async_typeObj.ext;
-      this.mime = async_typeObj.mime;
-      this.realExt = async_typeObj.realExt;
-      this.realMime = async_typeObj.realMime;
-      callback.bind(this)();
-    });
+    getType(this.input)
+      .then(async_typeObj => {
+        this.ext = async_typeObj.ext;
+        this.mime = async_typeObj.mime;
+        this.realExt = async_typeObj.realExt;
+        this.realMime = async_typeObj.realMime;
+        callback.bind(this)();
+      })
+      .catch(reason => {
+        throw new Error(reason);
+      });
   }
   /**
    * @param {*} targetMimeType
@@ -82,55 +93,69 @@ class TypeFile {
   }
 }
 
-/**
- * 获取文件的后缀和mimeType， 如果getRealType为true则通过读取文件二进制获取真实的数据，否则只获取浏览器解析的数据
- * @param {File} file
- * @param {Boolean} getRealType
- */
-const getType = (fileInstance, getRealType) => {
+const getType = input => {
   return new Promise((resolve, reject) => {
-    let file = fileInstance;
-    if (!isObject(file) && !isFileInstance(file)) {
-      reject(new Error('first param need a File instance or a Object include File instance.'));
-    } else {
+    if (!isUint8Array(input)) {
+      return fileToUint8Array(input).then(
+        u8 => {
+          return resolve({
+            ext: getFileExt(input),
+            mime: input.type ? input.type : null,
+            ...getRealTypeFromUint8Array(u8),
+          });
+        },
+        reason => {
+          return reject(reason);
+        },
+      );
+    }
+    return resolve({ ext: null, mime: null, ...getRealTypeFromUint8Array(input) });
+  });
+};
+
+const getRealTypeFromUint8Array = u8 => {
+  const realType = fileType(u8);
+  return {
+    realExt: realType ? realType.ext : null,
+    realMime: realType ? realType.mime : null,
+  };
+};
+
+const fileToUint8Array = f => {
+  let file = f;
+  return new Promise((resolve, reject) => {
+    if (isObject(file) && !isFileInstance(file)) {
       for (let key in file) {
-        if (file[key] instanceof File) {
+        if (isFileInstance(file[key])) {
           file = file[key];
           break;
         }
       }
     }
 
-    if (getRealType) {
-      var reader = new FileReader();
-      reader.readAsArrayBuffer(file.slice(0, fileType.minimumBytes));
-      reader.onloadend = function(e) {
-        if (e.target.readyState === FileReader.DONE) {
-          const buffer = e.target.result; //此时是arraybuffer类型
-          const type = fileType(new Uint8Array(buffer));
-          const realTypeObj = getBrowserTypeObj(file);
-          realTypeObj.realExt = type ? type.ext : null;
-          realTypeObj.realMime = type ? type.mime : null;
-          resolve(realTypeObj);
-        }
-      };
-      reader.onerror = function(e) {
-        reject(e);
-      };
-    } else {
-      resolve(getBrowserTypeObj(file));
+    if (!isFileInstance(file)) {
+      return reject('first param need a File instance or a Object include File instance.');
     }
+
+    if (!isInBrowser()) {
+      return reject('FileReader is not support! not in browser');
+    }
+
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(file.slice(0, fileType.minimumBytes));
+    reader.onloadend = function(e) {
+      if (e.target.readyState === FileReader.DONE) {
+        return resolve(new Uint8Array(e.target.result)); // 将arraybuffer类型转换为Uint8Array
+      }
+    };
+    reader.onerror = function(e) {
+      return reject(e);
+    };
   });
 };
 
-function getBrowserTypeObj(file) {
-  const ext = getFileExt(file);
-  return {
-    ext: ext,
-    mime: file.type ? file.type : null,
-    realExt: null,
-    realMime: null,
-  };
-}
+export const exportObj = { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping };
 
-export { browserMimeMapping, realExtMapping, realMimeMapping, TypeFile };
+// if (isInBrowser()) {
+//   window.$getRealFileType = exportObj;
+// }

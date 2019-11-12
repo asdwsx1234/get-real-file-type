@@ -1,9 +1,10 @@
 {
   "name": "get-real-file-type",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "get real file type.",
   "main": "./lib/index.js",
   "scripts": {
+    "browserify": "browserify lib -o demo/dist.js",
     "compile": "babel src -d lib",
     "prepublish": "npm run compile"
   },
