@@ -58,7 +58,7 @@ class TypeFile {
         callback.bind(this)();
       })
       .catch(reason => {
-        throw new Error(reason);
+        console.error(reason);
       });
   }
   /**
@@ -96,7 +96,6 @@ class TypeFile {
 const getType = input => {
   return new Promise((resolve, reject) => {
     if (!isUint8Array(input)) {
-
       let file = input;
       if (isObject(file) && !isFileInstance(file)) {
         for (let key in file) {
@@ -106,23 +105,20 @@ const getType = input => {
           }
         }
       }
-  
+
       if (!isFileInstance(file)) {
-        return reject('first param need a File instance or a Object include File instance.');
+        return reject(
+          new Error('first param need a File instance or a Object include File instance.'),
+        );
       }
 
-      return fileToUint8Array(file).then(
-        u8 => {
-          return resolve({
-            ext: getFileExt(file),
-            mime: file.type ? file.type : null,
-            ...getRealTypeFromUint8Array(u8),
-          });
-        },
-        reason => {
-          return reject(reason);
-        },
-      );
+      return fileToUint8Array(file).then(u8 => {
+        return resolve({
+          ext: getFileExt(file),
+          mime: file.type ? file.type : null,
+          ...getRealTypeFromUint8Array(u8),
+        });
+      });
     }
     return resolve({ ext: null, mime: null, ...getRealTypeFromUint8Array(input) });
   });
@@ -139,23 +135,21 @@ const getRealTypeFromUint8Array = u8 => {
 const fileToUint8Array = file => {
   return new Promise((resolve, reject) => {
     if (!isInBrowser()) {
-      return reject('FileReader is not support! not in browser');
+      return reject(new Error('FileReader is not support! not in browser'));
     }
 
     const reader = new FileReader();
     reader.readAsArrayBuffer(file.slice(0, fileType.minimumBytes));
     reader.onloadend = function(e) {
       if (e.target.readyState === FileReader.DONE) {
-        return resolve(new Uint8Array(e.target.result)); // 将arraybuffer类型转换为Uint8Array
+        resolve(new Uint8Array(e.target.result)); // 将arraybuffer类型转换为Uint8Array
       }
     };
-    reader.onerror = function(e) {
-      return reject(e);
-    };
+    reader.onerror = reject;
   });
 };
 
-export const exportObj = { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping };
+export { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping };
 
 // if (isInBrowser()) {
 //   window.$getRealFileType = exportObj;
