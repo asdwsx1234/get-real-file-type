@@ -1,26 +1,41 @@
 import fileType from 'file-type';
 
 import {
-  isObject,
+  isObjectObject,
   isString,
   isStringArray,
   isFileInstance,
   getFileExt,
   isUint8Array,
   isInBrowser,
-} from './util.js';
+} from './util';
 import browserMimeMapping from './browserMimeMapping';
+
+interface realMimeMapping {
+  [key: string]: string;
+}
+
+interface realExtMapping {
+  [key: string]: string;
+}
+
+interface Async_typeObj {
+  ext: null | string;
+  mime: null | string;
+  realExt: null | string;
+  realMime: null | string;
+}
 
 const extensions = fileType.extensions;
 const mimeTypes = fileType.mimeTypes;
 
-const realMimeMapping = {};
+const realMimeMapping: realMimeMapping = {};
 
 for (let mime of mimeTypes) {
   realMimeMapping[mime] = mime;
 }
 
-const realExtMapping = {};
+const realExtMapping: realExtMapping = {};
 
 for (let ext of extensions) {
   realExtMapping[ext] = ext;
@@ -34,7 +49,9 @@ class TypeFile {
     BROWSER_ONLY: 3,
   };
 
-  static compare(mime, targetMimeType) {
+  static compare(mime: null | string, targetMimeType: string): Boolean;
+  static compare(mime: null | string, targetMimeType: string[]): Boolean;
+  static compare(mime: null | string, targetMimeType: any): Boolean {
     if (isString(targetMimeType)) {
       return mime === targetMimeType;
     } else if (isStringArray(targetMimeType)) {
@@ -44,11 +61,21 @@ class TypeFile {
     }
   }
 
-  constructor(input) {
+  input: Object | File | Uint8Array;
+  ext: null | string;
+  mime: null | string;
+  realExt: null | string;
+  realMime: null | string;
+
+  constructor(input: any) {
     this.input = input;
+    this.ext = null;
+    this.mime = null;
+    this.realExt = null;
+    this.realMime = null;
   }
 
-  init(callback) {
+  init(callback: Function) {
     getType(this.input)
       .then(async_typeObj => {
         this.ext = async_typeObj.ext;
@@ -61,11 +88,10 @@ class TypeFile {
         console.error(reason);
       });
   }
-  /**
-   * @param {*} targetMimeType
-   * @param {*} compareRealType
-   */
-  isType(targetMimeType, compareType = TypeFile.COMPARE_TYPE.REAL_FIRST) {
+
+  isType(targetMimeType: string, compareType?: Number): Boolean;
+  isType(targetMimeType: string[], compareType?: Number): Boolean;
+  isType(targetMimeType: any, compareType: Number = TypeFile.COMPARE_TYPE.REAL_FIRST) {
     switch (compareType) {
       case TypeFile.COMPARE_TYPE.REAL_FIRST: {
         if (this.realMime) {
@@ -92,12 +118,14 @@ class TypeFile {
     }
   }
 }
-
-const getType = input => {
+function getType(input: Object): Promise<Async_typeObj>;
+function getType(input: File): Promise<Async_typeObj>;
+function getType(input: Uint8Array): Promise<Async_typeObj>;
+function getType(input: any): Promise<Async_typeObj> {
   return new Promise((resolve, reject) => {
     if (!isUint8Array(input)) {
       let file = input;
-      if (isObject(file) && !isFileInstance(file)) {
+      if (isObjectObject(file) && !isFileInstance(file)) {
         for (let key in file) {
           if (isFileInstance(file[key])) {
             file = file[key];
@@ -122,9 +150,9 @@ const getType = input => {
     }
     return resolve({ ext: null, mime: null, ...getRealTypeFromUint8Array(input) });
   });
-};
+}
 
-const getRealTypeFromUint8Array = u8 => {
+const getRealTypeFromUint8Array = (u8: Uint8Array) => {
   const realType = fileType(u8);
   return {
     realExt: realType ? realType.ext : null,
@@ -132,7 +160,7 @@ const getRealTypeFromUint8Array = u8 => {
   };
 };
 
-const fileToUint8Array = file => {
+const fileToUint8Array = (file: File): Promise<Uint8Array> => {
   return new Promise((resolve, reject) => {
     if (!isInBrowser()) {
       return reject(new Error('FileReader is not support! not in browser'));
@@ -141,8 +169,8 @@ const fileToUint8Array = file => {
     const reader = new FileReader();
     reader.readAsArrayBuffer(file.slice(0, fileType.minimumBytes));
     reader.onloadend = function(e) {
-      if (e.target.readyState === FileReader.DONE) {
-        resolve(new Uint8Array(e.target.result)); // 将arraybuffer类型转换为Uint8Array
+      if (e.target && e.target.readyState === FileReader.DONE) {
+        resolve(new Uint8Array(<ArrayBuffer>e.target.result)); // 将arraybuffer类型转换为Uint8Array
       }
     };
     reader.onerror = reject;
