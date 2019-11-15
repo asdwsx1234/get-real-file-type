@@ -1,22 +1,22 @@
 import fileType from 'file-type';
 
 import {
-  isObject,
+  isObjectObject,
   isString,
   isStringArray,
   isFileInstance,
   getFileExt,
   isUint8Array,
   isInBrowser,
-} from './util.js';
+} from './util';
 import browserMimeMapping from './browserMimeMapping';
 
 interface realMimeMapping {
-  [key: string]: string
+  [key: string]: string;
 }
 
 interface realExtMapping {
-  [key: string]: string
+  [key: string]: string;
 }
 
 interface Async_typeObj {
@@ -89,8 +89,8 @@ class TypeFile {
       });
   }
 
-  isType(targetMimeType: string, compareType: Number): Boolean;
-  isType(targetMimeType: string[], compareType: Number): Boolean;
+  isType(targetMimeType: string, compareType?: Number): Boolean;
+  isType(targetMimeType: string[], compareType?: Number): Boolean;
   isType(targetMimeType: any, compareType: Number = TypeFile.COMPARE_TYPE.REAL_FIRST) {
     switch (compareType) {
       case TypeFile.COMPARE_TYPE.REAL_FIRST: {
@@ -125,7 +125,7 @@ function getType(input: any): Promise<Async_typeObj> {
   return new Promise((resolve, reject) => {
     if (!isUint8Array(input)) {
       let file = input;
-      if (isObject(file) && !isFileInstance(file)) {
+      if (isObjectObject(file) && !isFileInstance(file)) {
         for (let key in file) {
           if (isFileInstance(file[key])) {
             file = file[key];

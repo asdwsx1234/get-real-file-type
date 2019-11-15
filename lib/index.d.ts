@@ -23,7 +23,7 @@ declare class TypeFile {
     realMime: null | string;
     constructor(input: any);
     init(callback: Function): void;
-    isType(targetMimeType: string, compareType: Number): Boolean;
-    isType(targetMimeType: string[], compareType: Number): Boolean;
+    isType(targetMimeType: string, compareType?: Number): Boolean;
+    isType(targetMimeType: string[], compareType?: Number): Boolean;
 }
 export { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping };

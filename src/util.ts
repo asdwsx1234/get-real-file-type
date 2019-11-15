@@ -12,6 +12,10 @@ export function isObject(arg: any) {
   return arg != null && (type == 'object' || type == 'function');
 }
 
+export function isObjectObject(arg: any) {
+  return isObject(arg) === true && objectToString.call(arg) === '[object Object]';
+}
+
 export function isString(arg: any) {
   return typeof arg === 'string';
 }

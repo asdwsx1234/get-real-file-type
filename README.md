@@ -31,13 +31,11 @@ fileInput.onchange = function(e) {
 
 ## API
 
-### TypeFile(file, getRealType?)
+### TypeFile(input)
 
-`file`参数需要是一个浏览器的`File实例`，或者是一个`object`包含`File实例`，或者是一个`Uint8Array`
+`input`参数需要是一个浏览器的`File实例`，或者是一个`object`包含`File实例`，或者是一个`Uint8Array`
 
 `File`实例最终也会转化为`Uint8Array`
-
-`getRealType`默认为`true`，表示获取真实的文件信息，不传入则`realExt`和`realMime`都为`null`
 
 该函数会返回一个`TypeFile`实例:
 
