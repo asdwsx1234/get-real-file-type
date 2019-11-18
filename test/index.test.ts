@@ -21,17 +21,18 @@ global.FileReader = FileApi.FileReader;
 
 describe('TypeFile Test', () => {
   it('TypeFile Instance(u8).', done => {
-    const t = new TypeFile(new Uint8Array()); // empty file
-    t.init(function() {
-      expect(t.isType('image/png')).to.equal(false);
-      expect(t.isType([''])).to.equal(false);
+    const t1 = new TypeFile(new Uint8Array()); // empty file
+    t1.onParseEnd = function() {
+      expect(t1.isType('image/png')).to.equal(false);
+      expect(t1.isType([''])).to.equal(false);
       done();
-    });
+    };
+    t1.start();
   });
 
   it('TypeFile Instance(File).', done => {
     const t1 = new TypeFile(new global['File'](path.resolve(__dirname, '../tsconfig.json')));
-    t1.init(function() {
+    t1.onParseEnd = function() {
       expect(t1.isType('image/png')).to.equal(false);
       expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.REAL_FIRST)).to.equal(true);
       expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.BROWSER_FIRST)).to.equal(true);
@@ -40,7 +41,8 @@ describe('TypeFile Test', () => {
       expect(t1.isType([''])).to.equal(false);
       expect(t1.isType(['image/png', 'application/json'])).to.equal(true);
       done();
-    });
+    };
+    t1.start();
   });
 
   it('TypeFile Instance(Object include File).', done => {
@@ -48,7 +50,7 @@ describe('TypeFile Test', () => {
       ttt: 'haha',
       file: new global['File'](path.resolve(__dirname, '../tsconfig.json')),
     });
-    t1.init(function() {
+    t1.onParseEnd = function() {
       expect(t1.isType('image/png')).to.equal(false);
       expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.REAL_FIRST)).to.equal(true);
       expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.BROWSER_FIRST)).to.equal(true);
@@ -57,7 +59,9 @@ describe('TypeFile Test', () => {
       expect(t1.isType([''])).to.equal(false);
       expect(t1.isType(['image/png', 'application/json'])).to.equal(true);
       done();
-    });
+    };
+
+    t1.start();
   });
 
   it('TypeFile static compare.', () => {

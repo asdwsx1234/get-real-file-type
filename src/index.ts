@@ -6,6 +6,7 @@ import {
   isStringArray,
   isFileInstance,
   getFileExt,
+  isFunction,
   isUint8Array,
 } from './util';
 import browserMimeMapping from './browserMimeMapping';
@@ -65,6 +66,8 @@ class TypeFile {
   mime: null | string;
   realExt: null | string;
   realMime: null | string;
+  onParseEnd: Function;
+  onParseError: Function;
 
   constructor(input: any) {
     this.input = input;
@@ -72,19 +75,22 @@ class TypeFile {
     this.mime = null;
     this.realExt = null;
     this.realMime = null;
+    this.onParseEnd = () => {};
+    this.onParseError = () => {};
   }
 
-  init(callback: Function): void {
+  start(): void {
     getType(this.input)
       .then(async_typeObj => {
         this.ext = async_typeObj.ext;
         this.mime = async_typeObj.mime;
         this.realExt = async_typeObj.realExt;
         this.realMime = async_typeObj.realMime;
-        callback.bind(this)();
+        isFunction(this.onParseEnd) && this.onParseEnd();
       })
       .catch(reason => {
         console.error(reason);
+        isFunction(this.onParseError) && this.onParseError();
       });
   }
 
