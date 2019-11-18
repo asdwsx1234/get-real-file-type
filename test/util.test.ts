@@ -1,5 +1,7 @@
+import { expect } from 'chai';
+import 'mocha';
+import path from 'path';
 import {
-  isInBrowser,
   isObject,
   isObjectObject,
   isString,
@@ -9,14 +11,21 @@ import {
   isUint8Array,
   getFileExt,
 } from '../src/util';
-import { expect } from 'chai';
-import 'mocha';
+const FileApi = require('file-api'); // 使用require可以不需要@types/file-api
+
+type FILE = typeof FileApi.File;
+declare global {
+  namespace NodeJS {
+    interface Global {
+      File: FILE;
+    }
+  }
+}
+
+global.File = FileApi.File;
 
 describe('Utils Test', () => {
-  it('isInBrowser should return Boolean.', () => {
-    expect(isInBrowser()).to.equal(false);
-  });
-
+  
   it('isObject should return Boolean.', () => {
     expect(isObject({})).to.equal(true);
     expect(isObject([])).to.equal(true);
@@ -48,6 +57,9 @@ describe('Utils Test', () => {
   });
 
   it('isFileInstance should return Boolean.', () => {
+    expect(isFileInstance(new global['File'](path.resolve(__dirname, '../LICENSE')))).to.equal(
+      true,
+    );
     expect(isFileInstance(new String())).to.equal(false);
     expect(isFileInstance({})).to.equal(false);
   });

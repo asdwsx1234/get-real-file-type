@@ -7,7 +7,6 @@ import {
   isFileInstance,
   getFileExt,
   isUint8Array,
-  isInBrowser,
 } from './util';
 import browserMimeMapping from './browserMimeMapping';
 
@@ -75,7 +74,7 @@ class TypeFile {
     this.realMime = null;
   }
 
-  init(callback: Function) {
+  init(callback: Function): void {
     getType(this.input)
       .then(async_typeObj => {
         this.ext = async_typeObj.ext;
@@ -162,13 +161,12 @@ const getRealTypeFromUint8Array = (u8: Uint8Array) => {
 
 const fileToUint8Array = (file: File): Promise<Uint8Array> => {
   return new Promise((resolve, reject) => {
-    if (!isInBrowser()) {
-      return reject(new Error('FileReader is not support! not in browser'));
+    if (!FileReader) {
+      return reject(new Error('FileReader is not support!'));
     }
-
     const reader = new FileReader();
-    reader.readAsArrayBuffer(file.slice(0, fileType.minimumBytes));
-    reader.onloadend = function(e) {
+    reader.readAsArrayBuffer(file.slice ? file.slice(0, fileType.minimumBytes) : file); // 兼容test中的Node的File没有slice方法
+    reader.onload = function(e) {
       if (e.target && e.target.readyState === FileReader.DONE) {
         resolve(new Uint8Array(<ArrayBuffer>e.target.result)); // 将arraybuffer类型转换为Uint8Array
       }
@@ -178,7 +176,3 @@ const fileToUint8Array = (file: File): Promise<Uint8Array> => {
 };
 
 export { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping };
-
-// if (isInBrowser()) {
-//   window.$getRealFileType = exportObj;
-// }

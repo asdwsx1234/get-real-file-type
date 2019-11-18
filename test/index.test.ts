@@ -1,14 +1,62 @@
 import { expect } from 'chai';
+import path from 'path';
 import 'mocha';
 
 import { TypeFile } from '../src/index';
+const FileApi = require('file-api'); // 使用require可以不需要@types/file-api
+
+type FILE = typeof FileApi.File;
+type FILEREADER = typeof FileApi.FileReader;
+declare global {
+  namespace NodeJS {
+    interface Global {
+      File: FILE;
+      FileReader: FILEREADER;
+    }
+  }
+}
+
+global.File = FileApi.File;
+global.FileReader = FileApi.FileReader;
 
 describe('TypeFile Test', () => {
-  it('TypeFile Instanece.', () => {
-    const t = new TypeFile(new Uint8Array());
+  it('TypeFile Instance(u8).', done => {
+    const t = new TypeFile(new Uint8Array()); // empty file
     t.init(function() {
       expect(t.isType('image/png')).to.equal(false);
-      expect(t.isType([''])).to.equal(false); // mime = null
+      expect(t.isType([''])).to.equal(false);
+      done();
+    });
+  });
+
+  it('TypeFile Instance(File).', done => {
+    const t1 = new TypeFile(new global['File'](path.resolve(__dirname, '../tsconfig.json')));
+    t1.init(function() {
+      expect(t1.isType('image/png')).to.equal(false);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.REAL_FIRST)).to.equal(true);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.BROWSER_FIRST)).to.equal(true);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.BROWSER_ONLY)).to.equal(true);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.REAL_ONLY)).to.equal(false);
+      expect(t1.isType([''])).to.equal(false);
+      expect(t1.isType(['image/png', 'application/json'])).to.equal(true);
+      done();
+    });
+  });
+
+  it('TypeFile Instance(Object include File).', done => {
+    const t1 = new TypeFile({
+      ttt: 'haha',
+      file: new global['File'](path.resolve(__dirname, '../tsconfig.json')),
+    });
+    t1.init(function() {
+      expect(t1.isType('image/png')).to.equal(false);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.REAL_FIRST)).to.equal(true);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.BROWSER_FIRST)).to.equal(true);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.BROWSER_ONLY)).to.equal(true);
+      expect(t1.isType('application/json', TypeFile.COMPARE_TYPE.REAL_ONLY)).to.equal(false);
+      expect(t1.isType([''])).to.equal(false);
+      expect(t1.isType(['image/png', 'application/json'])).to.equal(true);
+      done();
     });
   });
 
