@@ -90,7 +90,7 @@ class TypeFile {
       })
       .catch(reason => {
         console.error(reason);
-        isFunction(this.onParseError) && this.onParseError();
+        isFunction(this.onParseError) && this.onParseError(reason);
       });
   }
 

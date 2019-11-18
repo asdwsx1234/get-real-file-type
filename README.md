@@ -46,9 +46,13 @@ fileInput.onchange = function(e) {
 
 该函数会返回一个`TypeFile`实例:
 
-#### init(callback)
+#### start()
+`start`方法调用后，文件就开始解析。
+看解析的结果来调用`onParseEnd`或`onParseError`
 
-`callback`只支持传入一个可执行函数(this 指向当前实例)，在`callback`调用的时候，该实例已经初始化完成。
+#### onParseEnd()
+
+`onParseEnd`会在`start`方法执行后，文件解析`成功`后立即调用，此时该实例已经初始化完成。
 
 初始化完成后会给实例初始化以下属性：
 
@@ -58,6 +62,11 @@ fileInput.onchange = function(e) {
 - `realMime` - 真实的文件的 mimeType
 
 识别不出的属性也为 null
+
+#### onParseError(reason)
+
+`onParseError`会在`start`方法执行后，文件解析`失败`后立即调用。
+默认第一个参数是错误的原因
 
 #### isType(targetMimeType, compareType?)
 
