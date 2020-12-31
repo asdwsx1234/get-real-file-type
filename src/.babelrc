@@ -1,0 +1,17 @@
+{
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "modules": false,
+        "targets": {
+          "chrome": "58",
+          "ie": "11"
+        }
+      }
+    ],
+    "@babel/typescript"
+  ],
+  "plugins": ["@babel/plugin-transform-runtime", "@babel/proposal-class-properties"],
+  "comments": false
+}

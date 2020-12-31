@@ -1,39 +1,47 @@
 {
   "name": "get-real-file-type",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "获取真实的文件类型，并方便的与目标类型进行比较",
-  "main": "./lib/index.js",
+  "main": "./lib/index.cjs.js",
   "scripts": {
     "type-check": "tsc --noEmit",
     "test": "mocha -r ts-node/register test/*.ts",
-    "build": "tsc --emitDeclarationOnly && babel src -d lib --extensions '.ts'",
+    "build": "rollup -c",
+    "build1": "tsc --emitDeclarationOnly && babel src -d lib --extensions '.ts'",
     "prepare": "npm run build",
     "prepublishOnly": "npm run test"
   },
   "files": [
     "lib/*"
   ],
+  "types": "lig/index.d.ts",
   "repository": "https://github.com/asdwsx1234/get-real-file-type",
   "author": "814930498@qq.com",
   "license": "ISC",
   "dependencies": {
-    "@babel/runtime": "^7.7.2",
+    "@babel/runtime": "^7.12.5",
     "file-type": "^12.4.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.40",
-    "@babel/core": "^7.0.0-beta.40",
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
     "@babel/plugin-proposal-class-properties": "^7.7.0",
-    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/plugin-transform-runtime": "^7.12.10",
     "@babel/preset-env": "^7.7.1",
     "@babel/preset-typescript": "^7.7.2",
+    "@rollup/plugin-babel": "^5.2.2",
+    "@rollup/plugin-commonjs": "^15.1.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
     "@types/chai": "^4.2.5",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.7",
     "chai": "^4.2.0",
     "file-api": "^0.10.4",
     "mocha": "^6.2.2",
+    "rollup": "^2.31.0",
+    "rollup-plugin-typescript2": "^0.29.0",
     "ts-node": "^8.5.0",
+    "tslib": "^2.0.3",
     "typescript": "^3.7.2"
   }
 }

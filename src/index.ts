@@ -26,6 +26,8 @@ interface Async_typeObj {
   realMime: null | string;
 }
 
+type inputType = Object | File | Uint8Array;
+
 const extensions = fileType.extensions;
 const mimeTypes = fileType.mimeTypes;
 
@@ -49,19 +51,17 @@ class TypeFile {
     BROWSER_ONLY: 3,
   };
 
-  static compare(mime: null | string, targetMimeType: string): Boolean;
-  static compare(mime: null | string, targetMimeType: string[]): Boolean;
-  static compare(mime: null | string, targetMimeType: any): Boolean {
+  static compare(mime: string | null, targetMimeType: string | string[]): boolean {
     if (isString(targetMimeType)) {
       return mime === targetMimeType;
     } else if (isStringArray(targetMimeType)) {
-      return targetMimeType.includes(mime);
+      return targetMimeType.includes(mime as string);
     } else {
       throw new Error('targetMimeType is not a string or a stringArray.');
     }
   }
 
-  input: Object | File | Uint8Array;
+  input: inputType;
   ext: null | string;
   mime: null | string;
   realExt: null | string;
@@ -81,22 +81,23 @@ class TypeFile {
 
   start(): void {
     getType(this.input)
-      .then(async_typeObj => {
+      .then((async_typeObj) => {
         this.ext = async_typeObj.ext;
         this.mime = async_typeObj.mime;
         this.realExt = async_typeObj.realExt;
         this.realMime = async_typeObj.realMime;
         isFunction(this.onParseEnd) && this.onParseEnd();
       })
-      .catch(reason => {
+      .catch((reason) => {
         console.error(reason);
         isFunction(this.onParseError) && this.onParseError(reason);
       });
   }
 
-  isType(targetMimeType: string, compareType?: Number): Boolean;
-  isType(targetMimeType: string[], compareType?: Number): Boolean;
-  isType(targetMimeType: any, compareType: Number = TypeFile.COMPARE_TYPE.REAL_FIRST) {
+  isType(
+    targetMimeType: string | string[],
+    compareType: number = TypeFile.COMPARE_TYPE.REAL_FIRST,
+  ) {
     switch (compareType) {
       case TypeFile.COMPARE_TYPE.REAL_FIRST: {
         if (this.realMime) {
@@ -145,7 +146,7 @@ function getType(input: any): Promise<Async_typeObj> {
         );
       }
 
-      return fileToUint8Array(file).then(u8 => {
+      return fileToUint8Array(file).then((u8) => {
         return resolve({
           ext: getFileExt(file),
           mime: file.type ? file.type : null,
@@ -172,7 +173,7 @@ const fileToUint8Array = (file: File): Promise<Uint8Array> => {
     }
     const reader = new FileReader();
     reader.readAsArrayBuffer(file.slice ? file.slice(0, fileType.minimumBytes) : file); // 兼容test中的Node的File没有slice方法
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       if (e.target && e.target.readyState === FileReader.DONE) {
         resolve(new Uint8Array(<ArrayBuffer>e.target.result)); // 将arraybuffer类型转换为Uint8Array
       }
@@ -181,4 +182,30 @@ const fileToUint8Array = (file: File): Promise<Uint8Array> => {
   });
 };
 
-export { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping };
+const getFileType = (input: inputType): Promise<Async_typeObj> => {
+  return new Promise((resolve, reject) => {
+    const typeFile = new TypeFile(input);
+    typeFile.onParseEnd = () => {
+      resolve(typeFile);
+    };
+    typeFile.onParseError = reject;
+    typeFile.start();
+  });
+};
+
+function fileIsType(
+  input: inputType,
+  type: string | string[],
+  compareType: number = TypeFile.COMPARE_TYPE.REAL_FIRST,
+): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const typeFile = new TypeFile(input);
+    typeFile.onParseEnd = () => {
+      resolve(typeFile.isType(type, compareType));
+    };
+    typeFile.onParseError = reject;
+    typeFile.start();
+  });
+}
+
+export { TypeFile, browserMimeMapping, realExtMapping, realMimeMapping, getFileType, fileIsType };
