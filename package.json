@@ -37,6 +37,7 @@
     "@types/node": "^12.12.7",
     "chai": "^4.2.0",
     "file-api": "^0.10.4",
+    "mime": "^1.6.0",
     "mocha": "^6.2.2",
     "rollup": "^2.31.0",
     "rollup-plugin-typescript2": "^0.29.0",
